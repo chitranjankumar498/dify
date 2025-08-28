@@ -1,0 +1,25 @@
+FROM docker.io/langgenius/dify-api:1.7.2
+
+
+RUN apt-get update && apt-get install -y \
+  wget
+
+# Args inside build stage
+## HTTP URL to retrieve CA certificates
+ARG DBS_ROOT_CACERT_URL="https://mycoolartifactory.s3.ap-southeast-1.amazonaws.com/dbs-certs/dbs_cert.cer"
+ARG DBS_ENTSUB_CACERT_URL="https://mycoolartifactory.s3.ap-southeast-1.amazonaws.com/dbs-certs/dbs_ent_sub.cer"
+
+## Download DBS certificates to /etc/ssl/certs
+RUN wget $DBS_ROOT_CACERT_URL  --output-document=/etc/ssl/certs/dbs_cert.crt
+RUN wget $DBS_ENTSUB_CACERT_URL --output-document=/etc/ssl/certs/dbs_ent_sub.cer
+
+# Download DBS certificates to /usr/share/ca-certificates
+RUN wget $DBS_ROOT_CACERT_URL --output-document=/usr/local/share/ca-certificates/dbs_cert.crt
+RUN wget $DBS_ENTSUB_CACERT_URL --output-document=/usr/local/share/ca-certificates/dbs_ent_sub.crt
+
+# Install OpenTelemetry
+RUN pip3 install opentelemetry-distro==0.48b0 opentelemetry-exporter-otlp==1.27.0
+RUN opentelemetry-bootstrap -a install
+
+# Update the ca-bundle
+RUN update-ca-certificates

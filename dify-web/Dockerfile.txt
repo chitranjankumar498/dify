@@ -1,0 +1,29 @@
+FROM docker.io/langgenius/dify-web:1.7.2
+
+USER root
+
+RUN apk update && apk add \
+  wget curl
+
+# Args inside build stage
+## HTTP URL to retrieve CA certificates
+ARG DBS_ROOT_CACERT_URL="https://mycoolartifactory.s3.ap-southeast-1.amazonaws.com/dbs-certs/dbs_cert.cer"
+ARG DBS_ENTSUB_CACERT_URL="https://mycoolartifactory.s3.ap-southeast-1.amazonaws.com/dbs-certs/dbs_ent_sub.cer"
+
+## Download DBS certificates to /etc/ssl/certs
+RUN wget $DBS_ROOT_CACERT_URL  --output-document=/etc/ssl/certs/dbs_cert.crt
+RUN wget $DBS_ENTSUB_CACERT_URL --output-document=/etc/ssl/certs/dbs_ent_sub.cer
+
+# Make directory
+RUN mkdir /usr/local/share/ca-certificates
+
+# Download DBS certificates to /usr/share/ca-certificates
+RUN wget $DBS_ROOT_CACERT_URL --output-document=/usr/local/share/ca-certificates/dbs_cert.crt
+RUN wget $DBS_ENTSUB_CACERT_URL --output-document=/usr/local/share/ca-certificates/dbs_ent_sub.crt
+
+# Alpine linux way of updating ca-certificates
+RUN apk --no-cache add ca-certificates \
+    && rm -rf /var/cache/apk/*
+RUN update-ca-certificates
+
+USER 1001

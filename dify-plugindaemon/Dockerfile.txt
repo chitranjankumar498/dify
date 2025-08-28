@@ -1,0 +1,21 @@
+FROM docker.io/langgenius/dify-plugin-daemon:0.2.0-local-linux-amd64
+
+
+RUN apt-get update && apt-get install -y \
+  wget
+
+# Args inside build stage
+## HTTP URL to retrieve CA certificates
+ARG DBS_ROOT_CACERT_URL="https://mycoolartifactory.s3.ap-southeast-1.amazonaws.com/dbs-certs/dbs_cert.cer"
+ARG DBS_ENTSUB_CACERT_URL="https://mycoolartifactory.s3.ap-southeast-1.amazonaws.com/dbs-certs/dbs_ent_sub.cer"
+
+## Download DBS certificates to /etc/ssl/certs
+RUN wget $DBS_ROOT_CACERT_URL  --output-document=/etc/ssl/certs/dbs_cert.crt
+RUN wget $DBS_ENTSUB_CACERT_URL --output-document=/etc/ssl/certs/dbs_ent_sub.cer
+
+# Download DBS certificates to /usr/share/ca-certificates
+RUN wget $DBS_ROOT_CACERT_URL --output-document=/usr/local/share/ca-certificates/dbs_cert.crt
+RUN wget $DBS_ENTSUB_CACERT_URL --output-document=/usr/local/share/ca-certificates/dbs_ent_sub.crt
+
+# Update the ca-bundle
+RUN update-ca-certificates
