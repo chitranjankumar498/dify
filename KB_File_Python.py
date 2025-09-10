@@ -11,7 +11,7 @@ def main(url:str,name:str ) -> dict:
     file_content = requests.get(url).content
 
     # Step 3: API details
-    url = "http://host.docker.internal/v1/datasets/838b5050-8dc6-4967-9a8a-bc181c9156b5/document/create-by-file"
+    kburl = "http://host.docker.internal/v1/datasets/838b5050-8dc6-4967-9a8a-bc181c9156b5/document/create-by-file"
     headers = {
         "Authorization": "Bearer dataset-REGgvHt3LTfDsnjT2JwVWOLk"
     }
@@ -40,10 +40,11 @@ def main(url:str,name:str ) -> dict:
     }
 
     # Step 6: Send request
-    response = requests.post(url, headers=headers, data=data, files=files)
+    response = requests.post(kburl, headers=headers, data=data, files=files)
 
     # Step 7: Return response
     try:
         return {"status": str(response.status_code), "result": response.text}
     except Exception:
         return {"status": str(response.status_code), "result": response.text}
+
